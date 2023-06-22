@@ -20,10 +20,10 @@ void outputToFile(const vector<vector<int>>& puzzle, const string& file) {
             outfile << endl;
         }
         outfile.close();
-        cout << "数独终局已写入文件 " << file << endl;
+        cout << "已写入文件 " << file << endl;
     }
     else {
-        cout << "无法打开文件 " << file << " 以写入数独终局！" << endl;
+        cout << "无法打开文件 " << file << " 以写入数独！" << endl;
     }
 }
 
@@ -102,27 +102,46 @@ bool solveSudoku(vector<vector<int>>& puzzle) {
     return true;
 }
 
+//打印
+void print(vector<vector<int>>& puzzle) {
+    for (int i = 0; i < puzzle.size(); i++) {
+        for (int j = 0; j < puzzle.size(); j++) {
+            cout << puzzle[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
 
 int main() {
     srand(time(0));
 
     // 生成数独终局
-    SudokuBoard board;
-    board.generateFinal();
-    vector<vector<int>> puzzle = board.getGrid();
-    for (int i = 0; i < GRID_SIZE; i++) {
-        for (int j = 0; j < GRID_SIZE; j++) {
-            cout << puzzle[i][j] << " ";
-        }
-        cout << endl;
-    }
-     
-   // vector<vector<int>> puzzle(GRID_SIZE, vector<int>(GRID_SIZE, 0));
-    //generateSudoku(puzzle);
+    SudokuBoard board_final;
+    board_final.generateFinal();
+    vector<vector<int>> finalSet = board_final.getGrid();
+    
+    //输出数独终局到文件
+    string outputFinal = "sudoku_final_set.txt";
+    outputToFile(finalSet, outputFinal);
 
-    // 输出数独终局到文件
-    /*string outputFile = "sudoku_terminus.txt";
-    outputToFile(puzzle, outputFile);
+    //从文件中读取数独终局
+    vector<vector<int>> puzzle = readFromFile(outputFinal);
+    //print(puzzle);
+
+    //生成数独游戏
+    int blank = 0;
+    cout << "输入空格数：" << endl;
+    cin >> blank;
+    SudokuBoard board_game(puzzle);
+    board_game.generateGame(blank);
+    vector<vector<int>> gameSet = board_game.getGrid();
+    //print(gameSet);
+
+    //输出数独游戏到文件
+    string outputGame = "sudoku_game.txt";
+    outputToFile(gameSet, outputGame);
+
+    /*
 
     // 从文件读取数独问题
     string inputFile = "sudoku_problem.txt";

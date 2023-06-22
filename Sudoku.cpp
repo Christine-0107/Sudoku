@@ -83,18 +83,6 @@ void SudokuBoard::swapCol(int m, int n, vector<vector<int>>& board) {
 	}
 }
 
-void SudokuBoard::selectBlank(int num) {
-	srand(time(0));
-	while (num > 0) {
-		int row = rand() % 9;
-		int col = rand() % 9;
-		if (this->grid[row][col] != 0) {
-			this->grid[row][col] = 0;
-			num--;
-		}
-	}
-}
-
 void SudokuBoard::generateFinal() {
 	//将9*9看成9个3*3，标号分别是1~9号
 	//中心格子（5号）的序列是(1,2,3)，两侧只能是(2,3,1)(3,1,2)或(3,1,2)(2,3,1)
@@ -190,5 +178,13 @@ void SudokuBoard::generateFinal() {
 }
 
 void SudokuBoard::generateGame(int num) {
-
+	srand(time(0));
+	while (num > 0) {
+		int row = rand() % 9;
+		int col = rand() % 9;
+		if (this->grid[row][col] != 0) {
+			this->grid[row][col] = 0;
+			num--;
+		}
+	}
 }
