@@ -16,53 +16,9 @@
 #include <algorithm>
 #include "Sudoku.h"
 using namespace std;
-const int K = 5;
-
-void fillPartOfBoard(vector<vector<int>>& board1, vector<vector<int>>& board2, int row, int col) {
-	//board1是9*9矩阵，board2是3*3矩阵
-	//将board2填充到board1行列均从(row,col)开始的3*3区域
-	for (int i = 0; i < board2.size(); i++) {
-		for (int j = 0; j < board2.size(); j++) {
-			board1[i + row][j + col] = board2[i][j];
-		}
-	}
-}
-
-int* select2Nums() {
-	int groups[3][3] = {
-		{0, 1, 2},
-		{3, 4, 5},
-		{6, 7, 8}
-	};
-	srand(time(0));
-	// 随机选择一组
-	int groupIndex = rand() % 3;
-
-	// 从选择的组中选取两个数
-	int* ret = new int[2];
-	ret[0] = rand() % 3;
-	ret[1] = rand() % 3; 
-	return ret;
-}
 
 vector<vector<int>> SudokuBoard::getGrid() {
 	return this->grid;
-}
-
-void SudokuBoard::fillCenter() {
-	//先初始化为0
-	this->grid.assign(GRID_SIZE, vector<int>(GRID_SIZE, 0));
-	this->gridCenter.assign(SUBGRID_SIZE, vector<int>(SUBGRID_SIZE, 0));
-	//初始化要填充的数字序列
-	int count = 0;
-	vector<int> nums = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-	random_shuffle(nums.begin(), nums.end());
-	for (int i = 0; i < 3; i++) {
-		for (int j = 0; j < 3; j++) {
-			this->gridCenter[i][j] = nums[count++];
-		}
-	}
-	fillPartOfBoard(this->grid, this->gridCenter, 3, 3);
 }
 
 void SudokuBoard::swapRow(int m, int n, vector<vector<int>>& board) {
@@ -83,6 +39,24 @@ void SudokuBoard::swapCol(int m, int n, vector<vector<int>>& board) {
 	}
 }
 
+bool SudokuBoard::isValid(int row, int col, int num) {
+	// 检查行和列是否有重复数字
+	for (int i = 0; i < GRID_SIZE; i++) {
+		if (this->grid[row][i] == num || this->grid[i][col] == num)
+			return false;
+	}
+	// 检查3x3小九宫格是否有重复数字
+	int startRow = (row / SUBGRID_SIZE) * SUBGRID_SIZE;
+	int startCol = (col / SUBGRID_SIZE) * SUBGRID_SIZE;
+	for (int i = 0; i < SUBGRID_SIZE; i++) {
+		for (int j = 0; j < SUBGRID_SIZE; j++) {
+			if (this->grid[startRow + i][startCol + j] == num)
+				return false;
+		}
+	}
+	return true;
+}
+
 vector<int> SudokuBoard::selectBlank(int num) {
 	//生成0~80的随机排列
 	vector<int> numbers(81);
@@ -99,7 +73,7 @@ vector<int> SudokuBoard::selectBlank(int num) {
 }
 
 bool SudokuBoard::solveGame(vector<vector<int>>& game) {
-
+	return true;
 }
 
 int SudokuBoard::generateUnique(vector<int>& blanks, vector<vector<int>>& gameTemp) {
@@ -138,98 +112,37 @@ int SudokuBoard::generateUnique(vector<int>& blanks, vector<vector<int>>& gameTe
 	
 }
 
-void SudokuBoard::generateFinal() {
-	//将9*9看成9个3*3，标号分别是1~9号
-	//中心格子（5号）的序列是(1,2,3)，两侧只能是(2,3,1)(3,1,2)或(3,1,2)(2,3,1)
-	//0代表(2,3,1)，1代表(3,1,2)
-	fillCenter();
-	int num1;
-	srand(time(0));
-	
-	//1.对5号行变换填4号，6号
-	num1 = rand() % 2;
-	vector<vector<int>> boardRow_231 = this->gridCenter;
-	swapRow(0, 1, boardRow_231); //213
-	swapRow(1, 2, boardRow_231); //231
-	vector<vector<int>> boardRow_312 = this->gridCenter;
-	swapRow(0, 2, boardRow_312); //321
-	swapRow(1, 2, boardRow_312); //312
-	if (num1 == 0) { // 4号231，6号312
-		fillPartOfBoard(this->grid, boardRow_231, 3, 0);
-		fillPartOfBoard(this->grid, boardRow_312, 3, 6);
-	}
-	else {
-		fillPartOfBoard(this->grid, boardRow_312, 3, 0);
-		fillPartOfBoard(this->grid, boardRow_231, 3, 6);
+bool SudokuBoard::generateFinal(int row, int col) {
+	// 达到数独格子的最后一个位置，所有格子已经填充完毕
+	if (row == GRID_SIZE - 1 && col == GRID_SIZE)
+		return true;
+
+	// 当前行填充完毕，进入下一行的起始位置
+	if (col == GRID_SIZE) {
+		row++;
+		col = 0;
 	}
 
-	//2.对5号进行列变换填2号，8号
-	num1 = rand() % 2;
-	vector<vector<int>> boardCol_231 = this->gridCenter;
-	swapCol(0, 1, boardCol_231); 
-	swapCol(1, 2, boardCol_231); 
-	vector<vector<int>> boardCol_312 = this->gridCenter;
-	swapCol(0, 2, boardCol_312); 
-	swapCol(1, 2, boardCol_312); 
-	vector<vector<int>> board_2;
-	vector<vector<int>> board_8;
-	if (num1 == 0) { // 2号231，8号312
-		fillPartOfBoard(this->grid, boardCol_231, 0, 3);
-		fillPartOfBoard(this->grid, boardCol_312, 6, 3);
-		board_2 = boardCol_231;
-		board_8 = boardCol_312;
-	}
-	else {
-		fillPartOfBoard(this->grid, boardCol_312, 0, 3);
-		fillPartOfBoard(this->grid, boardCol_231, 6, 3);
-		board_2 = boardCol_312;
-		board_8 = boardCol_231;
+	// 当前格子已经有数字，跳过继续填充下一个格子
+	if (this->grid[row][col] != 0)
+		return generateFinal(row, col + 1);
+
+	// 数字1到9随机排序
+	vector<int> nums = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	random_shuffle(nums.begin(), nums.end());
+
+	// 尝试填充当前格子
+	for (int i = 0; i < nums.size(); i++) {
+		if (isValid(row, col, nums[i])) {
+			this->grid[row][col] = nums[i];
+			if (generateFinal(row, col + 1))
+				return true;
+			// 回溯，尝试下一个数字
+			this->grid[row][col] = 0;
+		}
 	}
 
-	//3.对2号进行行变换填1号，3号
-	num1 = rand() % 2;
-	vector<vector<int>> boardUp_231 = board_2;
-	swapRow(0, 1, boardUp_231);
-	swapRow(1, 2, boardUp_231);
-	vector<vector<int>> boardUp_312 = board_2;
-	swapRow(0, 2, boardUp_312); 
-	swapRow(1, 2, boardUp_312); 
-	if (num1 == 0) { //1号231，3号312
-		fillPartOfBoard(this->grid, boardUp_231, 0, 0);
-		fillPartOfBoard(this->grid, boardUp_312, 0, 6);
-	}
-	else {
-		fillPartOfBoard(this->grid, boardUp_312, 0, 0);
-		fillPartOfBoard(this->grid, boardUp_231, 0, 6);
-	}
-
-	//4.对8号进行行变换填7号，9号
-	num1 = rand() % 2;
-	vector<vector<int>> boardDown_231 = board_8;
-	swapRow(0, 1, boardDown_231);
-	swapRow(1, 2, boardDown_231);
-	vector<vector<int>> boardDown_312 = board_8;
-	swapRow(0, 2, boardDown_312);
-	swapRow(1, 2, boardDown_312);
-	if (num1 == 0) { //7号231，9号312
-		fillPartOfBoard(this->grid, boardDown_231, 6, 0);
-		fillPartOfBoard(this->grid, boardDown_312, 6, 6);
-	}
-	else {
-		fillPartOfBoard(this->grid, boardDown_312, 6, 0);
-		fillPartOfBoard(this->grid, boardDown_231, 6, 6);
-	}
-
-	//5.随机进行行列变换K次
-	for (int i = 0; i < K; i++) {
-		int* ret = new int[2];
-		ret = select2Nums();
-		swapRow(ret[0], ret[1], this->grid);
-		ret = select2Nums();
-		swapCol(ret[0], ret[1], this->grid);
-	}
-
-
+	return false;
 }
 
 vector<vector<int>> SudokuBoard::generateGame(bool flag, int num, int& realBlank) {
@@ -243,7 +156,7 @@ vector<vector<int>> SudokuBoard::generateGame(bool flag, int num, int& realBlank
 	}
 	//2. 不要求唯一解，或此时就是唯一解， 直接返回
 	if (!flag || solveGame(gameTemp)) {
-		return;
+		return gameTemp;
 	}
 	//3. 生成唯一解
 	int blankNum = generateUnique(blanks, gameTemp);
