@@ -83,6 +83,61 @@ void SudokuBoard::swapCol(int m, int n, vector<vector<int>>& board) {
 	}
 }
 
+vector<int> SudokuBoard::selectBlank(int num) {
+	//生成0~80的随机排列
+	vector<int> numbers(81);
+	for (int i = 0; i < 81; i++) {
+		numbers[i] = i;
+	}
+	random_shuffle(numbers.begin(), numbers.end());
+	//返回前num个
+	vector<int> ret;
+	for (int i = 0; i < num; i++) {
+		ret.push_back(numbers[i]);
+	}
+	return ret;
+}
+
+bool SudokuBoard::solveGame(vector<vector<int>>& game) {
+
+}
+
+int SudokuBoard::generateUnique(vector<int>& blanks, vector<vector<int>>& gameTemp) {
+	int left = 0;
+	int right = blanks.size() - 1;
+	int pos = -1; //第一个出现多解的挖空位置的blanks下标
+
+	while (left <= right) {
+		int mid = left + (right - left) / 2;
+		for (int i = left; i <= mid; i++) {
+			int row = blanks[i] / GRID_SIZE;
+			int col = blanks[i] % GRID_SIZE;
+			gameTemp[row][col] = 0;
+		}
+		for (int i = mid + 1; i < blanks.size(); i++) {
+			int row = blanks[i] / GRID_SIZE;
+			int col = blanks[i] % GRID_SIZE;
+			gameTemp[row][col] = this->grid[row][col];
+		}
+		if (solveGame(gameTemp)) {
+			left = mid + 1;
+		}
+		else {
+			pos = mid;
+			right = mid - 1;
+		}
+	}
+
+	//pos位置也要填数，不能挖空了
+	int row = blanks[pos] / GRID_SIZE;
+	int col = blanks[pos] % GRID_SIZE;
+	gameTemp[row][col] = this->grid[row][col];
+
+	//pos的值就是最终达到唯一解时挖空的个数
+	return pos;
+	
+}
+
 void SudokuBoard::generateFinal() {
 	//将9*9看成9个3*3，标号分别是1~9号
 	//中心格子（5号）的序列是(1,2,3)，两侧只能是(2,3,1)(3,1,2)或(3,1,2)(2,3,1)
@@ -177,14 +232,21 @@ void SudokuBoard::generateFinal() {
 
 }
 
-void SudokuBoard::generateGame(int num) {
-	srand(time(0));
-	while (num > 0) {
-		int row = rand() % 9;
-		int col = rand() % 9;
-		if (this->grid[row][col] != 0) {
-			this->grid[row][col] = 0;
-			num--;
-		}
+vector<vector<int>> SudokuBoard::generateGame(bool flag, int num, int& realBlank) {
+	//1. 挖空
+	vector<vector<int>> gameTemp = this->grid;
+	vector<int> blanks = selectBlank(num);
+	for (int i = 0; i < blanks.size(); i++) {
+		int row = blanks[i] / GRID_SIZE;
+		int col = blanks[i] % GRID_SIZE;
+		gameTemp[row][col] = 0;
 	}
+	//2. 不要求唯一解，或此时就是唯一解， 直接返回
+	if (!flag || solveGame(gameTemp)) {
+		return;
+	}
+	//3. 生成唯一解
+	int blankNum = generateUnique(blanks, gameTemp);
+	realBlank = blankNum;
+	return gameTemp;
 }
