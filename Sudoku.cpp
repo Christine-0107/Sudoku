@@ -197,9 +197,20 @@ bool SudokuBoard::generateFinal() {
 	return solveGame(0, 0);
 }
 
-vector<vector<int>> SudokuBoard::generateGame(bool flag, int num, int& realBlank) {
+vector<vector<int>> SudokuBoard::generateGame(bool flag, int num, int& realBlank, int difficulty) {
 	//1. 挖空
 	vector<vector<int>> gameTemp = this->grid;
+	switch (difficulty) {
+	case 1:
+		num = 35;
+		break;
+	case 2:
+		num = 45;
+		break;
+	case 3:
+		num = 55;
+		break;
+	}
 	vector<int> blanks = selectBlank(num);
 	for (int i = 0; i < blanks.size(); i++) {
 		int row = blanks[i] / GRID_SIZE;

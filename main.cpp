@@ -86,8 +86,9 @@ int main() {
     print(puzzle);
 
     //生成数独游戏
-    int realBlank = 40;
-    vector<vector<int>> gameSet = board_finalSet.generateGame(true, 40, realBlank);
+    int realBlank = 45; //如果用户没有要求，默认从45个空开始
+    int difficulty = 2;  //难度等级1：20~35  等级2：36~45  等级3：46~55
+    vector<vector<int>> gameSet = board_finalSet.generateGame(true, 40, realBlank, difficulty);
     cout << "数独游戏" << endl;
     print(gameSet);
     cout << "空格数" << realBlank << endl;
