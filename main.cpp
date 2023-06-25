@@ -57,51 +57,6 @@ vector<vector<int>> readFromFile(const string& file) {
     return puzzle;
 }
 
-
-// 检查数独终局的某个位置是否合法
-bool isValid(const vector<vector<int>>& puzzle, int row, int col, int num) {
-    // 检查行和列
-    for (int i = 0; i < GRID_SIZE; ++i) {
-        if (puzzle[row][i] == num || puzzle[i][col] == num) {
-            return false;
-        }
-    }
-
-    // 检查3x3子网格
-    int subgridRow = SUBGRID_SIZE * (row / SUBGRID_SIZE);
-    int subgridCol = SUBGRID_SIZE * (col / SUBGRID_SIZE);
-    for (int i = 0; i < SUBGRID_SIZE; ++i) {
-        for (int j = 0; j < SUBGRID_SIZE; ++j) {
-            if (puzzle[subgridRow + i][subgridCol + j] == num) {
-                return false;
-            }
-        }
-    }
-
-    return true;
-}
-
-// 使用回溯算法求解数独问题
-bool solveSudoku(vector<vector<int>>& puzzle) {
-    for (int row = 0; row < GRID_SIZE; ++row) {
-        for (int col = 0; col < GRID_SIZE; ++col) {
-            if (puzzle[row][col] == 0) {
-                for (int num = 1; num <= GRID_SIZE; ++num) {
-                    if (isValid(puzzle, row, col, num)) {
-                        puzzle[row][col] = num;
-                        if (solveSudoku(puzzle)) {
-                            return true;
-                        }
-                        puzzle[row][col] = 0;  // 回溯
-                    }
-                }
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
 //打印
 void print(vector<vector<int>>& puzzle) {
     for (int i = 0; i < puzzle.size(); i++) {
@@ -151,31 +106,9 @@ int main() {
     cout << "数独解" << endl;
     print(solution);
 
-    /*int blank = 0;
-    cout << "输入空格数：" << endl;
-    cin >> blank;
-    SudokuBoard board_game(puzzle);
-    board_game.generateGame(blank);
-    vector<vector<int>> gameSet = board_game.getGrid();
-    //print(gameSet);
-
-    //输出数独游戏到文件
-    string outputGame = "sudoku_game.txt";
-    outputToFile(gameSet, outputGame);*/
-
-    /*
-
-    // 从文件读取数独问题
-    string inputFile = "sudoku_problem.txt";
-    vector<vector<int>> problem = readFromFile(inputFile);
-    if (!problem.empty()) {
-        // 求解数独问题
-        solveSudoku(problem);
-
-        // 输出结果到文件
-        string outputSolution = "sudoku_solution.txt";
-        outputToFile(problem, outputSolution);
-    }*/
+    // 输出结果到文件
+    string outputSolution = "sudoku_solution.txt";
+    outputToFile(solution, outputSolution);
 
     return 0;
 }
