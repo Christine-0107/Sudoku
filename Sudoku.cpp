@@ -17,6 +17,15 @@
 #include "Sudoku.h"
 using namespace std;
 
+void print1(vector<vector<int>>& puzzle) {
+	for (int i = 0; i < puzzle.size(); i++) {
+		for (int j = 0; j < puzzle.size(); j++) {
+			cout << puzzle[i][j] << " ";
+		}
+		cout << endl;
+	}
+}
+
 vector<vector<int>> SudokuBoard::getGrid() {
 	return this->grid;
 }
@@ -39,10 +48,10 @@ void SudokuBoard::swapCol(int m, int n, vector<vector<int>>& board) {
 	}
 }
 
-bool SudokuBoard::isValid(int row, int col, int num) {
+bool SudokuBoard::isValid(vector<vector<int>>& board, int row, int col, int num) {
 	// 检查行和列是否有重复数字
 	for (int i = 0; i < GRID_SIZE; i++) {
-		if (this->grid[row][i] == num || this->grid[i][col] == num)
+		if (board[row][i] == num || board[i][col] == num)
 			return false;
 	}
 	// 检查3x3小九宫格是否有重复数字
@@ -50,7 +59,7 @@ bool SudokuBoard::isValid(int row, int col, int num) {
 	int startCol = (col / SUBGRID_SIZE) * SUBGRID_SIZE;
 	for (int i = 0; i < SUBGRID_SIZE; i++) {
 		for (int j = 0; j < SUBGRID_SIZE; j++) {
-			if (this->grid[startRow + i][startCol + j] == num)
+			if (board[startRow + i][startCol + j] == num)
 				return false;
 		}
 	}
@@ -72,8 +81,72 @@ vector<int> SudokuBoard::selectBlank(int num) {
 	return ret;
 }
 
-bool SudokuBoard::solveGame(vector<vector<int>>& game) {
-	return true;
+bool SudokuBoard::solveGame(int row, int col) {
+	// 达到数独格子的最后一个位置，所有格子已经填充完毕
+	if (row == GRID_SIZE - 1 && col == GRID_SIZE)
+		return true;
+
+	// 当前行填充完毕，进入下一行的起始位置
+	if (col == GRID_SIZE) {
+		row++;
+		col = 0;
+	}
+
+	// 当前格子已经有数字，跳过继续填充下一个格子
+	if (this->grid[row][col] != 0)
+		return solveGame(row, col + 1);
+
+	// 数字1到9随机排序
+	vector<int> nums = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	random_shuffle(nums.begin(), nums.end());
+
+	// 尝试填充当前格子
+	for (int i = 0; i < nums.size(); i++) {
+		if (isValid(this->grid, row, col, nums[i])) {
+			this->grid[row][col] = nums[i];
+			if (solveGame(row, col + 1))
+				return true;
+			// 回溯，尝试下一个数字
+			this->grid[row][col] = 0;
+		}
+	}
+
+	return false;
+}
+
+bool SudokuBoard::judgeUnique(vector<vector<int>>& gameTemp, int row, int col, int& solutions) {
+	// 达到数独格子的最后一个位置，所有格子已经填充完毕
+	if (row == GRID_SIZE - 1 && col == GRID_SIZE) {
+		solutions++;
+		return solutions > 1;  // 如果存在多个解，则返回true
+	}
+
+	// 当前行填充完毕，进入下一行的起始位置
+	if (col == GRID_SIZE) {
+		row++;
+		col = 0;
+	}
+
+	// 当前格子已经有数字，跳过继续填充下一个格子
+	if (gameTemp[row][col] != 0)
+		return judgeUnique(gameTemp, row, col + 1, solutions);
+
+	// 数字1到9随机排序
+	vector<int> nums = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	random_shuffle(nums.begin(), nums.end());
+
+	// 尝试填充当前格子
+	for (int num : nums) {
+		if (isValid(gameTemp, row, col, num)) {
+			gameTemp[row][col] = num;
+			if (judgeUnique(gameTemp, row, col + 1, solutions))
+				return true;
+			// 回溯，尝试下一个数字
+			gameTemp[row][col] = 0;
+		}
+	}
+
+	return false;
 }
 
 int SudokuBoard::generateUnique(vector<int>& blanks, vector<vector<int>>& gameTemp) {
@@ -93,7 +166,9 @@ int SudokuBoard::generateUnique(vector<int>& blanks, vector<vector<int>>& gameTe
 			int col = blanks[i] % GRID_SIZE;
 			gameTemp[row][col] = this->grid[row][col];
 		}
-		if (solveGame(gameTemp)) {
+		int solutions = 0;
+		judgeUnique(gameTemp, 0, 0, solutions);
+		if (solutions == 1) {
 			left = mid + 1;
 		}
 		else {
@@ -102,47 +177,24 @@ int SudokuBoard::generateUnique(vector<int>& blanks, vector<vector<int>>& gameTe
 		}
 	}
 
-	//pos位置也要填数，不能挖空了
-	int row = blanks[pos] / GRID_SIZE;
-	int col = blanks[pos] % GRID_SIZE;
-	gameTemp[row][col] = this->grid[row][col];
+	for (int i = 0; i < pos; i++) {
+		int row = blanks[i] / GRID_SIZE;
+		int col = blanks[i] % GRID_SIZE;
+		gameTemp[row][col] = 0;
+	}
+	for (int i = pos; i < blanks.size(); i++) {
+		int row = blanks[i] / GRID_SIZE;
+		int col = blanks[i] % GRID_SIZE;
+		gameTemp[row][col] = this->grid[row][col];
+	}
 
 	//pos的值就是最终达到唯一解时挖空的个数
 	return pos;
 	
 }
 
-bool SudokuBoard::generateFinal(int row, int col) {
-	// 达到数独格子的最后一个位置，所有格子已经填充完毕
-	if (row == GRID_SIZE - 1 && col == GRID_SIZE)
-		return true;
-
-	// 当前行填充完毕，进入下一行的起始位置
-	if (col == GRID_SIZE) {
-		row++;
-		col = 0;
-	}
-
-	// 当前格子已经有数字，跳过继续填充下一个格子
-	if (this->grid[row][col] != 0)
-		return generateFinal(row, col + 1);
-
-	// 数字1到9随机排序
-	vector<int> nums = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-	random_shuffle(nums.begin(), nums.end());
-
-	// 尝试填充当前格子
-	for (int i = 0; i < nums.size(); i++) {
-		if (isValid(row, col, nums[i])) {
-			this->grid[row][col] = nums[i];
-			if (generateFinal(row, col + 1))
-				return true;
-			// 回溯，尝试下一个数字
-			this->grid[row][col] = 0;
-		}
-	}
-
-	return false;
+bool SudokuBoard::generateFinal() {
+	return solveGame(0, 0);
 }
 
 vector<vector<int>> SudokuBoard::generateGame(bool flag, int num, int& realBlank) {
@@ -154,8 +206,12 @@ vector<vector<int>> SudokuBoard::generateGame(bool flag, int num, int& realBlank
 		int col = blanks[i] % GRID_SIZE;
 		gameTemp[row][col] = 0;
 	}
+	cout << "初始生成的游戏" << endl;
+	print1(gameTemp);
 	//2. 不要求唯一解，或此时就是唯一解， 直接返回
-	if (!flag || solveGame(gameTemp)) {
+	int solutions = 0;
+	judgeUnique(gameTemp, 0, 0, solutions);
+	if (!flag || solutions == 1) {
 		return gameTemp;
 	}
 	//3. 生成唯一解

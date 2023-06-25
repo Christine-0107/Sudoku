@@ -117,7 +117,7 @@ int main() {
 
     // 生成数独终局
     SudokuBoard board_final;
-    board_final.generateFinal(0,0);
+    board_final.generateFinal();
     vector<vector<int>> finalSet = board_final.getGrid();
     
     //输出数独终局到文件
@@ -126,9 +126,31 @@ int main() {
 
     //从文件中读取数独终局
     vector<vector<int>> puzzle = readFromFile(outputFinal);
+    SudokuBoard board_finalSet(puzzle);
+    cout << "数独终局" << endl;
     print(puzzle);
 
     //生成数独游戏
+    int realBlank = 40;
+    vector<vector<int>> gameSet = board_finalSet.generateGame(true, 40, realBlank);
+    cout << "数独游戏" << endl;
+    print(gameSet);
+    cout << "空格数" << realBlank << endl;
+
+    //输出数独游戏到文件
+    string outputGame = "sudoku_game.txt";
+    outputToFile(gameSet, outputGame);
+
+    //从文件中读取数独游戏
+    vector<vector<int>> game = readFromFile(outputGame);
+    SudokuBoard board_gameSet(game);
+
+    //求解数独游戏
+    board_gameSet.solveGame(0, 0);
+    vector<vector<int>> solution = board_gameSet.getGrid();
+    cout << "数独解" << endl;
+    print(solution);
+
     /*int blank = 0;
     cout << "输入空格数：" << endl;
     cin >> blank;
