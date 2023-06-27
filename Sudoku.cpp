@@ -1,11 +1,11 @@
-ï»¿//Todo:
-//1. ç”Ÿæˆæ•°ç‹¬æ¸¸æˆå­˜å…¥æ–‡ä»¶
-//2. -s è¯»å–æ•°ç‹¬æ¸¸æˆï¼Œè§£ç­”å¹¶å­˜å…¥æ–‡ä»¶
-//3. -c æ•°ç‹¬ç»ˆç›˜æ•°é‡
-//4. -n æ•°ç‹¬æ¸¸æˆæ•°é‡
-//5. -n -m æ•°ç‹¬éš¾åº¦
-//6. -n -r æŒ–ç©ºèŒƒå›´
-//7. -n -u å”¯ä¸€è§£
+//Todo:
+//1. Éú³ÉÊı¶ÀÓÎÏ·´æÈëÎÄ¼ş
+//2. -s ¶ÁÈ¡Êı¶ÀÓÎÏ·£¬½â´ğ²¢´æÈëÎÄ¼ş
+//3. -c Êı¶ÀÖÕÅÌÊıÁ¿
+//4. -n Êı¶ÀÓÎÏ·ÊıÁ¿
+//5. -n -m Êı¶ÀÄÑ¶È
+//6. -n -r ÍÚ¿Õ·¶Î§
+//7. -n -u Î¨Ò»½â
 
 #include <iostream>
 #include <fstream>
@@ -20,7 +20,11 @@ using namespace std;
 void print1(vector<vector<int>>& puzzle) {
 	for (int i = 0; i < puzzle.size(); i++) {
 		for (int j = 0; j < puzzle.size(); j++) {
-			cout << puzzle[i][j] << " ";
+            if(puzzle[i][j]==0){
+                cout<<'$'<<" ";
+            }else {
+                cout << puzzle[i][j] << " ";
+            }
 		}
 		cout << endl;
 	}
@@ -49,12 +53,12 @@ void SudokuBoard::swapCol(int m, int n, vector<vector<int>>& board) {
 }
 
 bool SudokuBoard::isValid(vector<vector<int>>& board, int row, int col, int num) {
-	// æ£€æŸ¥è¡Œå’Œåˆ—æ˜¯å¦æœ‰é‡å¤æ•°å­—
+	// ¼ì²éĞĞºÍÁĞÊÇ·ñÓĞÖØ¸´Êı×Ö
 	for (int i = 0; i < GRID_SIZE; i++) {
 		if (board[row][i] == num || board[i][col] == num)
 			return false;
 	}
-	// æ£€æŸ¥3x3å°ä¹å®«æ ¼æ˜¯å¦æœ‰é‡å¤æ•°å­—
+	// ¼ì²é3x3Ğ¡¾Å¹¬¸ñÊÇ·ñÓĞÖØ¸´Êı×Ö
 	int startRow = (row / SUBGRID_SIZE) * SUBGRID_SIZE;
 	int startCol = (col / SUBGRID_SIZE) * SUBGRID_SIZE;
 	for (int i = 0; i < SUBGRID_SIZE; i++) {
@@ -67,13 +71,13 @@ bool SudokuBoard::isValid(vector<vector<int>>& board, int row, int col, int num)
 }
 
 vector<int> SudokuBoard::selectBlank(int num) {
-	//ç”Ÿæˆ0~80çš„éšæœºæ’åˆ—
+	//Éú³É0~80µÄËæ»úÅÅÁĞ
 	vector<int> numbers(81);
 	for (int i = 0; i < 81; i++) {
 		numbers[i] = i;
 	}
 	random_shuffle(numbers.begin(), numbers.end());
-	//è¿”å›å‰numä¸ª
+	//·µ»ØÇ°num¸ö
 	vector<int> ret;
 	for (int i = 0; i < num; i++) {
 		ret.push_back(numbers[i]);
@@ -82,31 +86,31 @@ vector<int> SudokuBoard::selectBlank(int num) {
 }
 
 bool SudokuBoard::solveGame(int row, int col) {
-	// è¾¾åˆ°æ•°ç‹¬æ ¼å­çš„æœ€åä¸€ä¸ªä½ç½®ï¼Œæ‰€æœ‰æ ¼å­å·²ç»å¡«å……å®Œæ¯•
+	// ´ïµ½Êı¶À¸ñ×ÓµÄ×îºóÒ»¸öÎ»ÖÃ£¬ËùÓĞ¸ñ×ÓÒÑ¾­Ìî³äÍê±Ï
 	if (row == GRID_SIZE - 1 && col == GRID_SIZE)
 		return true;
 
-	// å½“å‰è¡Œå¡«å……å®Œæ¯•ï¼Œè¿›å…¥ä¸‹ä¸€è¡Œçš„èµ·å§‹ä½ç½®
+	// µ±Ç°ĞĞÌî³äÍê±Ï£¬½øÈëÏÂÒ»ĞĞµÄÆğÊ¼Î»ÖÃ
 	if (col == GRID_SIZE) {
 		row++;
 		col = 0;
 	}
 
-	// å½“å‰æ ¼å­å·²ç»æœ‰æ•°å­—ï¼Œè·³è¿‡ç»§ç»­å¡«å……ä¸‹ä¸€ä¸ªæ ¼å­
+	// µ±Ç°¸ñ×ÓÒÑ¾­ÓĞÊı×Ö£¬Ìø¹ı¼ÌĞøÌî³äÏÂÒ»¸ö¸ñ×Ó
 	if (this->grid[row][col] != 0)
 		return solveGame(row, col + 1);
 
-	// æ•°å­—1åˆ°9éšæœºæ’åº
+	// Êı×Ö1µ½9Ëæ»úÅÅĞò
 	vector<int> nums = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 	random_shuffle(nums.begin(), nums.end());
 
-	// å°è¯•å¡«å……å½“å‰æ ¼å­
+	// ³¢ÊÔÌî³äµ±Ç°¸ñ×Ó
 	for (int i = 0; i < nums.size(); i++) {
 		if (isValid(this->grid, row, col, nums[i])) {
 			this->grid[row][col] = nums[i];
 			if (solveGame(row, col + 1))
 				return true;
-			// å›æº¯ï¼Œå°è¯•ä¸‹ä¸€ä¸ªæ•°å­—
+			// »ØËİ£¬³¢ÊÔÏÂÒ»¸öÊı×Ö
 			this->grid[row][col] = 0;
 		}
 	}
@@ -115,33 +119,33 @@ bool SudokuBoard::solveGame(int row, int col) {
 }
 
 bool SudokuBoard::judgeUnique(vector<vector<int>>& gameTemp, int row, int col, int& solutions) {
-	// è¾¾åˆ°æ•°ç‹¬æ ¼å­çš„æœ€åä¸€ä¸ªä½ç½®ï¼Œæ‰€æœ‰æ ¼å­å·²ç»å¡«å……å®Œæ¯•
+	// ´ïµ½Êı¶À¸ñ×ÓµÄ×îºóÒ»¸öÎ»ÖÃ£¬ËùÓĞ¸ñ×ÓÒÑ¾­Ìî³äÍê±Ï
 	if (row == GRID_SIZE - 1 && col == GRID_SIZE) {
 		solutions++;
-		return solutions > 1;  // å¦‚æœå­˜åœ¨å¤šä¸ªè§£ï¼Œåˆ™è¿”å›true
+		return solutions > 1;  // Èç¹û´æÔÚ¶à¸ö½â£¬Ôò·µ»Øtrue
 	}
 
-	// å½“å‰è¡Œå¡«å……å®Œæ¯•ï¼Œè¿›å…¥ä¸‹ä¸€è¡Œçš„èµ·å§‹ä½ç½®
+	// µ±Ç°ĞĞÌî³äÍê±Ï£¬½øÈëÏÂÒ»ĞĞµÄÆğÊ¼Î»ÖÃ
 	if (col == GRID_SIZE) {
 		row++;
 		col = 0;
 	}
 
-	// å½“å‰æ ¼å­å·²ç»æœ‰æ•°å­—ï¼Œè·³è¿‡ç»§ç»­å¡«å……ä¸‹ä¸€ä¸ªæ ¼å­
+	// µ±Ç°¸ñ×ÓÒÑ¾­ÓĞÊı×Ö£¬Ìø¹ı¼ÌĞøÌî³äÏÂÒ»¸ö¸ñ×Ó
 	if (gameTemp[row][col] != 0)
 		return judgeUnique(gameTemp, row, col + 1, solutions);
 
-	// æ•°å­—1åˆ°9éšæœºæ’åº
+	// Êı×Ö1µ½9Ëæ»úÅÅĞò
 	vector<int> nums = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 	random_shuffle(nums.begin(), nums.end());
 
-	// å°è¯•å¡«å……å½“å‰æ ¼å­
+	// ³¢ÊÔÌî³äµ±Ç°¸ñ×Ó
 	for (int num : nums) {
 		if (isValid(gameTemp, row, col, num)) {
 			gameTemp[row][col] = num;
 			if (judgeUnique(gameTemp, row, col + 1, solutions))
 				return true;
-			// å›æº¯ï¼Œå°è¯•ä¸‹ä¸€ä¸ªæ•°å­—
+			// »ØËİ£¬³¢ÊÔÏÂÒ»¸öÊı×Ö
 			gameTemp[row][col] = 0;
 		}
 	}
@@ -152,7 +156,7 @@ bool SudokuBoard::judgeUnique(vector<vector<int>>& gameTemp, int row, int col, i
 int SudokuBoard::generateUnique(vector<int>& blanks, vector<vector<int>>& gameTemp) {
 	int left = 0;
 	int right = blanks.size() - 1;
-	int pos = -1; //ç¬¬ä¸€ä¸ªå‡ºç°å¤šè§£çš„æŒ–ç©ºä½ç½®çš„blanksä¸‹æ ‡
+	int pos = -1; //µÚÒ»¸ö³öÏÖ¶à½âµÄÍÚ¿ÕÎ»ÖÃµÄblanksÏÂ±ê
 
 	while (left <= right) {
 		int mid = left + (right - left) / 2;
@@ -188,7 +192,7 @@ int SudokuBoard::generateUnique(vector<int>& blanks, vector<vector<int>>& gameTe
 		gameTemp[row][col] = this->grid[row][col];
 	}
 
-	//posçš„å€¼å°±æ˜¯æœ€ç»ˆè¾¾åˆ°å”¯ä¸€è§£æ—¶æŒ–ç©ºçš„ä¸ªæ•°
+	//posµÄÖµ¾ÍÊÇ×îÖÕ´ïµ½Î¨Ò»½âÊ±ÍÚ¿ÕµÄ¸öÊı
 	return pos;
 	
 }
@@ -198,7 +202,7 @@ bool SudokuBoard::generateFinal() {
 }
 
 vector<vector<int>> SudokuBoard::generateGame(bool flag, int num, int& realBlank, int difficulty) {
-	//1. æŒ–ç©º
+	//1. ÍÚ¿Õ
 	vector<vector<int>> gameTemp = this->grid;
 	switch (difficulty) {
 	case 1:
@@ -217,15 +221,15 @@ vector<vector<int>> SudokuBoard::generateGame(bool flag, int num, int& realBlank
 		int col = blanks[i] % GRID_SIZE;
 		gameTemp[row][col] = 0;
 	}
-	cout << "åˆå§‹ç”Ÿæˆçš„æ¸¸æˆ" << endl;
+	cout << "³õÊ¼Éú³ÉµÄÓÎÏ·" << endl;
 	print1(gameTemp);
-	//2. ä¸è¦æ±‚å”¯ä¸€è§£ï¼Œæˆ–æ­¤æ—¶å°±æ˜¯å”¯ä¸€è§£ï¼Œ ç›´æ¥è¿”å›
+	//2. ²»ÒªÇóÎ¨Ò»½â£¬»ò´ËÊ±¾ÍÊÇÎ¨Ò»½â£¬ Ö±½Ó·µ»Ø
 	int solutions = 0;
 	judgeUnique(gameTemp, 0, 0, solutions);
 	if (!flag || solutions == 1) {
 		return gameTemp;
 	}
-	//3. ç”Ÿæˆå”¯ä¸€è§£
+	//3. Éú³ÉÎ¨Ò»½â
 	int blankNum = generateUnique(blanks, gameTemp);
 	realBlank = blankNum;
 	return gameTemp;
