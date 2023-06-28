@@ -5,6 +5,8 @@ using namespace std;
 const int GRID_SIZE = 9;
 const int SUBGRID_SIZE = 3;
 
+void print(vector<vector<int>>& puzzle);
+
 class SudokuBoard {
 private:
 	vector<vector<int>> grid; //9*9

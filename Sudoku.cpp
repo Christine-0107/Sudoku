@@ -16,17 +16,18 @@
 #include "Sudoku.h"
 using namespace std;
 
-void print1(vector<vector<int>>& puzzle) {
-	for (int i = 0; i < puzzle.size(); i++) {
-		for (int j = 0; j < puzzle.size(); j++) {
+//打印
+void print(vector<vector<int>>& puzzle) {
+    for (int i = 0; i < puzzle.size(); i++) {
+        for (int j = 0; j < puzzle.size(); j++) {
             if(puzzle[i][j]==0){
                 cout<<'$'<<" ";
-            }else {
+            }else{
                 cout << puzzle[i][j] << " ";
             }
-		}
-		cout << endl;
-	}
+        }
+        cout << endl;
+    }
 }
 
 vector<vector<int>> SudokuBoard::getGrid() {
@@ -224,7 +225,7 @@ vector<vector<int>> SudokuBoard::generateGame1(bool flag, int num, int& realBlan
         resGame[row][col] = 0;
 	}
 	cout << "初始生成的游戏" << endl;
-	print1(resGame);
+	print(resGame);
 	//2. 不要求唯一解，或此时就是唯一解， 直接返回
 	int solutions = 0;
     vector<vector<int>> tempGame=resGame;
@@ -251,8 +252,6 @@ vector<vector<int>> SudokuBoard::generateGame(bool unique, int low, int high, in
         int col = blanks[i] % GRID_SIZE;
         resGame[row][col] = 0;
     }
-//    cout << "初始生成的游戏" << endl;
-//    print1(gameTemp);
     //2. 不要求唯一解，或此时就是唯一解， 直接返回
     int solutions = 0;
     vector<vector<int>> tempGame=resGame;
