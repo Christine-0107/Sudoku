@@ -8,6 +8,19 @@
 #include "Sudoku.h"
 #include <cstring>
 
+//打印
+void print(vector<vector<int>>& puzzle) {
+    for (int i = 0; i < puzzle.size(); i++) {
+        for (int j = 0; j < puzzle.size(); j++) {
+            if(puzzle[i][j]==0){
+                cout<<'$'<<" ";
+            }else{
+                cout << puzzle[i][j] << " ";
+            }
+        }
+        cout << endl;
+    }
+}
 
 // 输出数独终局到文件
 void outputToFile(const vector<vector<int>>& puzzle, ofstream& outfile) {
@@ -24,52 +37,78 @@ void outputToFile(const vector<vector<int>>& puzzle, ofstream& outfile) {
 }
 
 // 从文件读取数独问题
-vector<vector<int>> readFromFile(const string& file) {
+vector<vector<int>> readFromFile(ifstream& infile) {
     vector<vector<int>> puzzle;
-    ifstream infile(file);
-    if (infile.is_open()) {
-        string line;
-        while (getline(infile, line)) {
-            istringstream iss(line);
-            vector<int> row;
-            char c;
-            int num;
-            while (iss >> c) {
-                if(c=='$'){
-                    num=0;
-                }else{
-                    num=c-'0';
-                }
-                row.push_back(num);
+    string line;
+    while (getline(infile, line)) {
+        istringstream iss(line);
+        vector<int> row;
+        char c;
+        int num;
+        while (iss >> c) {
+            if(c=='$'){
+                num=0;
+            }else{
+                num=c-'0';
             }
-            if (row.size() == GRID_SIZE) {
-                puzzle.push_back(row);
-            }
-            else {
-                cout << "非法的数独问题格式！" << endl;
-                puzzle.clear();
-                break;
-            }
+            row.push_back(num);
         }
-        infile.close();
-    }
-    else {
-        cout << "无法打开文件 " << file << " 以读取数独问题！" << endl;
+        if (row.size() == GRID_SIZE) {
+            puzzle.push_back(row);
+        }
+        else {
+            if(row.size() == 0 &&puzzle.size()==GRID_SIZE){
+                return puzzle;
+            }
+            print(puzzle);
+            cout << "非法的数独问题格式！" << endl;
+            puzzle.clear();
+            break;
+        }
     }
     return puzzle;
 }
 
-//打印
-void print(vector<vector<int>>& puzzle) {
-    for (int i = 0; i < puzzle.size(); i++) {
-        for (int j = 0; j < puzzle.size(); j++) {
-            if(puzzle[i][j]==0){
-                cout<<'$'<<" ";
-            }else{
-                cout << puzzle[i][j] << " ";
+//以指定终局finalPuzzle生成挖空数指定在low~high的数独游戏，unique为是否需要具有唯一解的标志
+vector<vector<int>> generateSpecifiedGame(vector<vector<int>> finalPuzzle ,int low, int high, bool unique){
+    SudokuBoard board_finalSet(finalPuzzle);
+
+}
+
+void nInsProcess(int argc, char* argv[]){
+    vector<vector<vector<int>>> puzzles;
+    ifstream inFile("sudoku_final_set.txt");
+    ofstream outFile("sudoku_game.txt");
+    if(!inFile.is_open()){
+        cout << "无法打开文件 sudoku_final_set.txt 以读取数独终局！" << endl;
+        return;
+    }
+    if(!outFile.is_open()){
+        cout << "无法打开文件 sudoku_game.txt 以写入生成的数独游戏！" << endl;
+        return;
+    }
+    if(argc==3){
+        int num = atoi(argv[2]);
+        for(int i=0;i<num;i++){
+            if (!inFile.eof()){
+                vector<vector<int>> puzzle = readFromFile(inFile);
+                SudokuBoard board_gameSet(puzzle);
+                board_gameSet.solveGame(0, 0);
+                vector<vector<int>> solution = board_gameSet.getGrid();
+                print(solution);
+                // 输出结果到文件
+                outputToFile(solution, outFile);
+                if(!inFile.eof()){
+                    outFile<<endl;
+                }
             }
         }
-        cout << endl;
+    } else if(argc==4){
+
+    }else if(argc==5){
+
+    }else if(argc==6){
+
     }
 }
 
@@ -125,9 +164,41 @@ int main(int argc, char* argv[]) {
             cout << "无法打开文件 " << filePath << " 以写入数独！" << endl;
         }
     }else if(!strcmp(argv[1],"-s")){
-
+        if(argc!=3){
+            cout<<"参数输入非法，请输入正确的参数"<<endl;
+            help();
+            return 0;
+        }
+        string filePath=argv[2];
+        ifstream inFile(filePath);
+        ofstream outFile("sudoku_solution.txt");
+        if (inFile.is_open() && outFile.is_open()) {
+            while (!inFile.eof()){
+                cout<<"求解数独游戏："<<endl;
+                vector<vector<int>> game = readFromFile(inFile);
+                SudokuBoard board_gameSet(game);
+                print(game);
+                cout<<"数独解："<<endl;
+                board_gameSet.solveGame(0, 0);
+                vector<vector<int>> solution = board_gameSet.getGrid();
+                print(solution);
+                // 输出结果到文件
+                outputToFile(solution, outFile);
+                if(!inFile.eof()){
+                    outFile<<endl;
+                }
+            }
+        }else {
+            cout << "打开文件 "<<filePath<<" 和 sudoku_solution.txt 失败！" << endl;
+        }
     }else if(!strcmp(argv[1],"-n")){
-
+        if(argc>6){
+            cout<<"参数输入非法，请输入正确的参数"<<endl;
+            help();
+            return 0;
+        }else{
+            nInsProcess(argc,argv);
+        }
     }else{
         cout<<"参数输入非法，请输入正确的参数"<<endl;
         help();

@@ -19,6 +19,7 @@ public:
 	SudokuBoard(vector<vector<int>>& board) { this->grid = board; }
 	vector<vector<int>> getGrid();
 	bool generateFinal();
-	vector<vector<int>> generateGame(bool flag, int num, int& realBlank, int difficulty);
+	vector<vector<int>> generateGame1(bool flag, int num, int& realBlank, int difficulty);
+    vector<vector<int>> generateGame(bool unique, int low, int high, int &count, int& realBlankNum, bool &success);
 	bool solveGame(int row, int col);
 };
