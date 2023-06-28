@@ -1,9 +1,8 @@
-//Todo:
 //1. 生成数独游戏存入文件
 //2. -s 读取数独游戏，解答并存入文件
 //3. -c 数独终盘数量
 //4. -n 数独游戏数量
-//5. -n -m 数独难度
+//5. -n -m 数独难度 难度等级1：20~35  等级2：36~45  等级3：46~55
 //6. -n -r 挖空范围
 //7. -n -u 唯一解
 
@@ -268,6 +267,7 @@ vector<vector<int>> SudokuBoard::generateGame(bool unique, int low, int high, in
         }
     }else{
         realBlankNum=high;
+        success= true;
     }
     return gameTemp;
 }
