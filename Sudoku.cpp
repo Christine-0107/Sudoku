@@ -203,7 +203,7 @@ bool SudokuBoard::generateFinal() {
 
 vector<vector<int>> SudokuBoard::generateGame1(bool flag, int num, int& realBlank, int difficulty) {
 	//1. 挖空
-	vector<vector<int>> gameTemp = this->grid;
+	vector<vector<int>> resGame = this->grid;
 	switch (difficulty) {
 	case 1:
 		num = 35;
@@ -221,46 +221,48 @@ vector<vector<int>> SudokuBoard::generateGame1(bool flag, int num, int& realBlan
 	for (int i = 0; i < blanks.size(); i++) {
 		int row = blanks[i] / GRID_SIZE;
 		int col = blanks[i] % GRID_SIZE;
-		gameTemp[row][col] = 0;
+        resGame[row][col] = 0;
 	}
 	cout << "初始生成的游戏" << endl;
-	print1(gameTemp);
+	print1(resGame);
 	//2. 不要求唯一解，或此时就是唯一解， 直接返回
 	int solutions = 0;
-	judgeUnique(gameTemp, 0, 0, solutions);
+    vector<vector<int>> tempGame=resGame;
+	judgeUnique(tempGame, 0, 0, solutions);
 	if (!flag || solutions == 1) {
-		return gameTemp;
+		return resGame;
 	}
 	//3. 生成唯一解
-	int blankNum = generateUnique(blanks, gameTemp);
+	int blankNum = generateUnique(blanks, resGame);
 	realBlank = blankNum;
-	return gameTemp;
+	return resGame;
 }
 
 vector<vector<int>> SudokuBoard::generateGame(bool unique, int low, int high, int &count, int& realBlankNum, bool& success){
     //1. 挖空
-    vector<vector<int>> gameTemp = this->grid;
+    vector<vector<int>> resGame = this->grid;
     if(count>=5){
         success= false;
-        return gameTemp;
+        return resGame;
     }
     vector<int> blanks = selectBlank(high);
     for (int i = 0; i < blanks.size(); i++) {
         int row = blanks[i] / GRID_SIZE;
         int col = blanks[i] % GRID_SIZE;
-        gameTemp[row][col] = 0;
+        resGame[row][col] = 0;
     }
 //    cout << "初始生成的游戏" << endl;
 //    print1(gameTemp);
     //2. 不要求唯一解，或此时就是唯一解， 直接返回
     int solutions = 0;
-    judgeUnique(gameTemp, 0, 0, solutions);
+    vector<vector<int>> tempGame=resGame;
+    judgeUnique(tempGame, 0, 0, solutions);
     if (unique && solutions != 1) {
         //3. 生成唯一解
-        int blankNum = generateUnique(blanks, gameTemp);
+        int blankNum = generateUnique(blanks, resGame);
         if(blankNum<low){
             count++;
-            gameTemp = generateGame(true,low,high,count,success);
+            resGame = generateGame(true,low,high,count,realBlankNum,success);
         }else{
             realBlankNum = blankNum;
             success = true;
@@ -269,5 +271,5 @@ vector<vector<int>> SudokuBoard::generateGame(bool unique, int low, int high, in
         realBlankNum=high;
         success= true;
     }
-    return gameTemp;
+    return resGame;
 }

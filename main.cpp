@@ -100,8 +100,28 @@ bool gerLowHigh(string arg, int &low,int&high){
     if(size==0){
         return false;
     }
+    int tempL=0,tempH=0;
+    bool isLow= true;
     for(int i=0;i< size;i++){
-
+        if(arg[i]=='~'){
+            isLow= false;
+            continue;
+        }
+        if(!isdigit(arg[i])){
+            return false;
+        }
+        if(isLow){
+            tempL+=(arg[i]-'0')*10;
+        }else{
+            tempH+=(arg[i]-'0')*10;
+        }
+    }
+    if(isLow== false){
+        low=tempL;
+        high=tempH;
+        return true;
+    }else{
+        return false;
     }
 }
 
@@ -145,7 +165,25 @@ void nInsProcess(int argc, char* argv[]){
             return;
         }
     }else if(argc==6){      // -n num -u -m level 或 -n num -u -r low~high
-
+        num = atoi(argv[2]);
+        if (strcmp(argv[3], "-u")) {
+            paramError();
+            return;
+        }
+        unique = true;
+        if(!strcmp(argv[4],"-m")){
+            int level = atoi(argv[5]);
+            if(!levelConvert(level,low,high)){
+                paramError();
+            }
+        }else if(!strcmp(argv[4],"-r")){
+            if(!gerLowHigh(argv[5],low,high)){
+                paramError();
+            }
+        }else{
+            paramError();
+            return;
+        }
     }
     int puzzleSeq=0;
     int failCount=0;
@@ -178,7 +216,11 @@ void nInsProcess(int argc, char* argv[]){
             i--;
         }else{
             outputToFile(game,outFile);
+            if(i!=num-1){
+                outFile<<endl;
+            }
             cout<<"成功生成第"<<i+1<<"个游戏，空格数为"<<realBlankNum<<endl;
+            print(game);
         }
     }
     outFile.close();
