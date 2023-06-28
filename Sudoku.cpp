@@ -77,6 +77,7 @@ vector<int> SudokuBoard::selectBlank(int num) {
 		numbers[i] = i;
 	}
 	random_shuffle(numbers.begin(), numbers.end());
+
 	//·µ»ØÇ°num¸ö
 	vector<int> ret;
 	for (int i = 0; i < num; i++) {
