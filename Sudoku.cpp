@@ -34,23 +34,6 @@ vector<vector<int>> SudokuBoard::getGrid() {
 	return this->grid;
 }
 
-void SudokuBoard::swapRow(int m, int n, vector<vector<int>>& board) {
-	int temp;
-	for (int j = 0; j < board.size(); j++) {
-		temp = board[m][j];
-		board[m][j] = board[n][j];
-		board[n][j] = temp;
-	}
-}
-
-void SudokuBoard::swapCol(int m, int n, vector<vector<int>>& board) {
-	int temp;
-	for (int i = 0; i < board.size(); i++) {
-		temp = board[i][m];
-		board[i][m] = board[i][n];
-		board[i][n] = temp;
-	}
-}
 
 bool SudokuBoard::isValid(vector<vector<int>>& board, int row, int col, int num) {
 	// 检查行和列是否有重复数字
@@ -172,7 +155,8 @@ int SudokuBoard::generateUnique(vector<int>& blanks, vector<vector<int>>& gameTe
 			gameTemp[row][col] = this->grid[row][col];
 		}
 		int solutions = 0;
-		judgeUnique(gameTemp, 0, 0, solutions);
+        vector<vector<int>> judgeTemp=gameTemp;
+		judgeUnique(judgeTemp, 0, 0, solutions);
 		if (solutions == 1) {
 			left = mid + 1;
 		}
@@ -202,42 +186,6 @@ bool SudokuBoard::generateFinal() {
 	return solveGame(0, 0);
 }
 
-vector<vector<int>> SudokuBoard::generateGame1(bool flag, int num, int& realBlank, int difficulty) {
-	//1. 挖空
-	vector<vector<int>> resGame = this->grid;
-	switch (difficulty) {
-	case 1:
-		num = 35;
-		break;
-	case 2:
-		num = 45;
-		break;
-	case 3:
-		num = 55;
-		break;
-    default:
-        num=45;
-	}
-	vector<int> blanks = selectBlank(num);
-	for (int i = 0; i < blanks.size(); i++) {
-		int row = blanks[i] / GRID_SIZE;
-		int col = blanks[i] % GRID_SIZE;
-        resGame[row][col] = 0;
-	}
-	cout << "初始生成的游戏" << endl;
-	print(resGame);
-	//2. 不要求唯一解，或此时就是唯一解， 直接返回
-	int solutions = 0;
-    vector<vector<int>> tempGame=resGame;
-	judgeUnique(tempGame, 0, 0, solutions);
-	if (!flag || solutions == 1) {
-		return resGame;
-	}
-	//3. 生成唯一解
-	int blankNum = generateUnique(blanks, resGame);
-	realBlank = blankNum;
-	return resGame;
-}
 
 vector<vector<int>> SudokuBoard::generateGame(bool unique, int low, int high, int &count, int& realBlankNum, bool& success){
     //1. 挖空

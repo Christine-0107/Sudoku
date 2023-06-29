@@ -1,7 +1,7 @@
 //
 // Created by Lenovo on 2023/6/29.
 //
-#include <iostream>
+
 #include "gtest/gtest.h"
 #include "instructions.h"
 
@@ -29,6 +29,10 @@ TEST(TestInstr,n_instr){
     ASSERT_EQ(processInstr(3,argv1), true);
     char* argv2[]={"Sudoku.exe","-n","3","wrong","wrong","wrong","wrong"};      // -n指令参数错误
     ASSERT_EQ(processInstr(7,argv2), false);
+    char* argv4[]={"Sudoku.exe","-n","3","wrong","wrong","wrong"};      // -n指令参数错误
+    ASSERT_EQ(processInstr(6,argv4), false);
+    char* argv3[]={"Sudoku.exe","-n","3","wrong","wrong"};      // -n指令参数错误
+    ASSERT_EQ(processInstr(5,argv3), false);
 }
 
 TEST(TestInstr,n_m_instr){
@@ -65,6 +69,9 @@ TEST(TestInstr,n_u_m_instr){
     ASSERT_EQ(processInstr(6,argv1), true);
     argv1[5]="4";                                                           // 错误的level
     ASSERT_EQ(processInstr(6,argv1), false);
+    argv1[5]="1";
+    argv1[4]="wrong";                                               //参数错误
+    ASSERT_EQ(processInstr(6,argv1), false);
 }
 
 TEST(TestInstr,n_u_r_instr){
@@ -75,12 +82,17 @@ TEST(TestInstr,n_u_r_instr){
 }
 
 TEST(TestInstr,s_instr){
-    char* argv1[]={"Sudoku.exe","-s","sudoku_game.txt"};       // -s filePath
-    ASSERT_EQ(processInstr(3,argv1), true);
     char* argv2[]={"Sudoku.exe","-s","fail.txt"};      // -s 不存在的filePath
     ASSERT_EQ(processInstr(3,argv2), false);
     char* argv3[]={"Sudoku.exe","-s","3","wrong"};      // -s指令参数错误
     ASSERT_EQ(processInstr(4,argv3), false);
+    char* argv1[]={"Sudoku.exe","-s","sudoku_game.txt"};       // -s filePath
+    ASSERT_EQ(processInstr(3,argv1), true);
+}
+
+TEST(TestInstr,n_high_demand){                  // 触发 failCount==3
+    char* argv1[]={"Sudoku.exe","-n","1000","-u","-r","40~45"};
+    ASSERT_EQ(processInstr(6,argv1), true);
 }
 
 TEST(TestReadFile,readFile){
@@ -109,6 +121,18 @@ TEST(TestGetLowHigh, wrong){                 // 测试getLowHigh()函数功能，错误
     ASSERT_EQ(getLowHigh(argTrue,low,high), true);
     ASSERT_EQ(low,28);
     ASSERT_EQ(high,50);
+}
+
+TEST(TestUnique,unique){                // 测试生成的数独是否具有唯一解
+    SudokuBoard test_sudoku;
+    test_sudoku.generateFinal();
+    int count=0,realBlankNum=-1;
+    bool success= false;
+    vector<vector<int>> game= test_sudoku.generateGame(true,25,45,count,realBlankNum,success);
+    ASSERT_EQ(success,true);
+    int solutions=0;
+    test_sudoku.judgeUnique(game,0,0,solutions);
+    ASSERT_EQ(solutions,1);
 }
 
 int main(){
