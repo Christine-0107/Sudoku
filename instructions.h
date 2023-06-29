@@ -1,10 +1,8 @@
 #ifndef SUDOKU_INSTRUCTIONS_H
 #define SUDOKU_INSTRUCTIONS_H
 
-#include <iostream>
 #include <fstream>
 #include <sstream>
-#include <vector>
 #include <cstdlib>
 #include <ctime>
 #include <algorithm>

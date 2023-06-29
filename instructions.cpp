@@ -50,10 +50,11 @@ bool processInstr(int argc, char* argv[]){
             }
             outFile.close();
             cout << "已写入文件 " << filePath << endl;
-        }else{
-            cout << "无法打开文件 " << filePath << " 以写入数独！" << endl;
-            return false;
         }
+//        else{
+//            cout << "无法打开文件 " << filePath << " 以写入数独！" << endl;
+//            return false;
+//        }
     }else if(!strcmp(argv[1],"-s")){
         if(argc!=3){
             paramError();
@@ -205,14 +206,14 @@ bool nInsProcess(int argc, char* argv[]){
     vector<vector<vector<int>>> puzzles;
     ifstream inFile("sudoku_final_set.txt");
     ofstream outFile("sudoku_game.txt");
-    if(!inFile.is_open()){
-        cout << "无法打开文件 sudoku_final_set.txt 以读取数独终局！" << endl;
-        return false;
-    }
-    if(!outFile.is_open()){
-        cout << "无法打开文件 sudoku_game.txt 以写入生成的数独游戏！" << endl;
-        return false;
-    }
+//    if(!inFile.is_open()){
+//        cout << "无法打开文件 sudoku_final_set.txt 以读取数独终局！" << endl;
+//        return false;
+//    }
+//    if(!outFile.is_open()){
+//        cout << "无法打开文件 sudoku_game.txt 以写入生成的数独游戏！" << endl;
+//        return false;
+//    }
     int num,low=36,high=45;
     bool unique = false;
     if(argc==3){        // -n num 默认为中等难度
