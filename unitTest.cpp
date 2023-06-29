@@ -114,13 +114,10 @@ TEST(TestGetLowHigh, right){                 // 测试getLowHigh()函数功能，正确
 
 TEST(TestGetLowHigh, wrong){                 // 测试getLowHigh()函数功能，错误
     int low,high;
-    string arg1="28~",arg2="2x",arg3="234",argTrue="28~50";
+    string arg1="28~",arg2="2x",arg3="234";
     ASSERT_EQ(getLowHigh(arg1,low,high), false);
     ASSERT_EQ(getLowHigh(arg2,low,high), false);
     ASSERT_EQ(getLowHigh(arg3,low,high), false);
-    ASSERT_EQ(getLowHigh(argTrue,low,high), true);
-    ASSERT_EQ(low,28);
-    ASSERT_EQ(high,50);
 }
 
 TEST(TestUnique,unique){                // 测试生成的数独是否具有唯一解

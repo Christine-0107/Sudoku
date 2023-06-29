@@ -144,6 +144,7 @@ vector<vector<int>> readFromFile(ifstream& infile) {
             if(row.size() == 0 &&puzzle.size()==GRID_SIZE){
                 return puzzle;
             }
+            puzzle.push_back(row);
             print(puzzle);
             cout << "非法的数独问题格式！" << endl;
             vector<vector<int>>().swap(puzzle);
