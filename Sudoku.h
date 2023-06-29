@@ -5,6 +5,8 @@ using namespace std;
 const int GRID_SIZE = 9;
 const int SUBGRID_SIZE = 3;
 
+void print(vector<vector<int>>& puzzle);
+
 class SudokuBoard {
 private:
 	vector<vector<int>> grid; //9*9
@@ -19,6 +21,7 @@ public:
 	SudokuBoard(vector<vector<int>>& board) { this->grid = board; }
 	vector<vector<int>> getGrid();
 	bool generateFinal();
-	vector<vector<int>> generateGame(bool flag, int num, int& realBlank, int difficulty);
+	vector<vector<int>> generateGame1(bool flag, int num, int& realBlank, int difficulty);
+    vector<vector<int>> generateGame(bool unique, int low, int high, int &count, int& realBlankNum, bool &success);
 	bool solveGame(int row, int col);
 };
