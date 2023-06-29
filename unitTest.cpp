@@ -68,10 +68,10 @@ TEST(TestInstr,n_u_m_instr){
 }
 
 TEST(TestInstr,n_u_r_instr){
-    char* argv1[]={"Sudoku.exe","-n","5","-u","-r","25~48"};      // -n num -u -r low~high
-    ASSERT_EQ(processInstr(6,argv1), true);
-    argv1[5]="28";                                  // ´íÎóµÄ·¶Î§¸ñÊ½
+    char* argv1[]={"Sudoku.exe","-n","5","-u","-r","25~"};                // ´íÎóµÄ·¶Î§¸ñÊ½
     ASSERT_EQ(processInstr(6,argv1), false);
+    argv1[5]="25~48";                                       // -n num -u -r low~high
+    ASSERT_EQ(processInstr(6,argv1), true);
 }
 
 TEST(TestInstr,s_instr){
