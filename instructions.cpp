@@ -1,12 +1,29 @@
 #include "instructions.h"
 
-void processInstr(int argc, char* argv[]){
+void help(){
+    cout<<"参数用法："<<endl;
+    cout<<"-c num ：生成num个数独终盘，默认输出到sudoku_final_set.txt中"<<endl;
+    cout<<"-c num filePath ：生成num个数独终盘到filePath对应文件中"<<endl;
+    cout<<"-s filePath ： 从filePath中读取若干个数独游戏，进行求解，并将求解结果输出到sudoku_solution.txt中"<<endl;
+    cout<<"-n num ：生成num个数独游戏，并输出到sudoku_game.txt中（默认难度为中等）"<<endl;
+    cout<<"-n num -m level ： 生成num个指定难度的数独游戏，并输出到sudoku_game.txt中。level从1到3表示从易到难"<<endl;
+    //难度等级1：20~35  等级2：36~45  等级3：46~55
+    cout<<"-n num -r low~high ： 生成num个挖空数在low~high之间的数独游戏，并输出到sudoku_game.txt中"<<endl;
+    cout<<"-n num -u ： 生成num个具有唯一解的数独游戏，并输出到sudoku_game.txt中"<<endl;
+    cout<<"-n num -u -m level ： 生成num个具有唯一解的指定难度的数独游戏，并输出到sudoku_game.txt中。level从1到3表示从易到难"<<endl;
+    cout<<"-n num -u -r low~high ： 生成num个具有唯一解的挖空数在low~high之间的数独游戏，并输出到sudoku_game.txt中"<<endl;
+}
+
+bool processInstr(int argc, char* argv[]){
+    #ifndef SRAND_TIME
+    #define SRAND_TIME
     srand(time(0));
+    #endif
 
     if(argc<3){
         cout<<"参数个数不足，请输入正确的参数"<<endl;
         help();
-        return;
+        return false;
     }
     if(!strcmp(argv[1],"-c")){
         string filePath;
@@ -16,7 +33,7 @@ void processInstr(int argc, char* argv[]){
             filePath=argv[3];
         }else{
             paramError();
-            return;
+            return false;
         }
         ofstream outFile(filePath);
         int num = atoi(argv[2]);
@@ -35,11 +52,12 @@ void processInstr(int argc, char* argv[]){
             cout << "已写入文件 " << filePath << endl;
         }else{
             cout << "无法打开文件 " << filePath << " 以写入数独！" << endl;
+            return false;
         }
     }else if(!strcmp(argv[1],"-s")){
         if(argc!=3){
             paramError();
-            return;
+            return false;
         }
         string filePath=argv[2];
         ifstream inFile(filePath);
@@ -64,17 +82,22 @@ void processInstr(int argc, char* argv[]){
             inFile.close();
         }else {
             cout << "打开文件 "<<filePath<<" 和 sudoku_solution.txt 失败！" << endl;
+            return false;
         }
     }else if(!strcmp(argv[1],"-n")){
         if(argc>6){
             paramError();
-            return;
+            return false;
         }else{
-            nInsProcess(argc,argv);
+            if(!nInsProcess(argc,argv)){
+                return false;
+            }
         }
     }else{
         paramError();
+        return false;
     }
+    return true;
 }
 
 // 输出数独终局到文件
@@ -122,7 +145,7 @@ vector<vector<int>> readFromFile(ifstream& infile) {
             }
             print(puzzle);
             cout << "非法的数独问题格式！" << endl;
-            puzzle.clear();
+            vector<vector<int>>().swap(puzzle);
             break;
         }
     }
@@ -152,13 +175,10 @@ bool levelConvert(int level,int&low,int &high){
 // 从参数low~high中获取low和high
 bool getLowHigh(string arg, int &low,int&high){
     int size=arg.size();
-    if(size==0){
-        return false;
-    }
     int tempL=0,tempH=0;
     bool isLow= true;
     for(int i=0;i< size;i++){
-        if(arg[i]=='~'){
+        if(arg[i]=='~'&&i!=size-1){
             isLow= false;
             continue;
         }
@@ -166,9 +186,9 @@ bool getLowHigh(string arg, int &low,int&high){
             return false;
         }
         if(isLow){
-            tempL+=(arg[i]-'0')*10;
+            tempL =tempL*10+ (arg[i]-'0');
         }else{
-            tempH+=(arg[i]-'0')*10;
+            tempH = tempH*10 + (arg[i]-'0');
         }
     }
     if(isLow== false){
@@ -181,17 +201,17 @@ bool getLowHigh(string arg, int &low,int&high){
 }
 
 //-n相关指令的处理，生成指定的数独游戏。数独游戏难度等级1：20~35  等级2：36~45  等级3：46~55
-void nInsProcess(int argc, char* argv[]){
+bool nInsProcess(int argc, char* argv[]){
     vector<vector<vector<int>>> puzzles;
     ifstream inFile("sudoku_final_set.txt");
     ofstream outFile("sudoku_game.txt");
     if(!inFile.is_open()){
         cout << "无法打开文件 sudoku_final_set.txt 以读取数独终局！" << endl;
-        return;
+        return false;
     }
     if(!outFile.is_open()){
         cout << "无法打开文件 sudoku_game.txt 以写入生成的数独游戏！" << endl;
-        return;
+        return false;
     }
     int num,low=36,high=45;
     bool unique = false;
@@ -201,7 +221,7 @@ void nInsProcess(int argc, char* argv[]){
         num = atoi(argv[2]);
         if (strcmp(argv[3], "-u")) {
             paramError();
-            return;
+            return false;
         }
         unique = true;
     } else if(argc==5){      // -n num -m level 或 -n num -r low~high
@@ -210,34 +230,38 @@ void nInsProcess(int argc, char* argv[]){
             int level = atoi(argv[4]);
             if(!levelConvert(level,low,high)){
                 paramError();
+                return false;
             }
         }else if(!strcmp(argv[3],"-r")){
             if(!getLowHigh(argv[4],low,high)){
                 paramError();
+                return false;
             }
         }else{
             paramError();
-            return;
+            return false;
         }
     }else if(argc==6){      // -n num -u -m level 或 -n num -u -r low~high
         num = atoi(argv[2]);
         if (strcmp(argv[3], "-u")) {
             paramError();
-            return;
+            return false;
         }
         unique = true;
         if(!strcmp(argv[4],"-m")){
             int level = atoi(argv[5]);
             if(!levelConvert(level,low,high)){
                 paramError();
+                return false;
             }
         }else if(!strcmp(argv[4],"-r")){
             if(!getLowHigh(argv[5],low,high)){
                 paramError();
+                return false;
             }
         }else{
             paramError();
-            return;
+            return false;
         }
     }
     int puzzleSeq=0;
@@ -279,18 +303,7 @@ void nInsProcess(int argc, char* argv[]){
     }
     outFile.close();
     inFile.close();
+    return true;
 }
 
-void help(){
-    cout<<"参数用法："<<endl;
-    cout<<"-c num ：生成num个数独终盘，默认输出到sudoku_final_set.txt中"<<endl;
-    cout<<"-c num filePath ：生成num个数独终盘到filePath对应文件中"<<endl;
-    cout<<"-s filePath ： 从filePath中读取若干个数独游戏，进行求解，并将求解结果输出到sudoku_solution.txt中"<<endl;
-    cout<<"-n num ：生成num个数独游戏，并输出到sudoku_game.txt中（默认难度为中等）"<<endl;
-    cout<<"-n num -m level ： 生成num个指定难度的数独游戏，并输出到sudoku_game.txt中。level从1到3表示从易到难"<<endl;
-    //难度等级1：20~35  等级2：36~45  等级3：46~55
-    cout<<"-n num -r low~high ： 生成num个挖空数在low~high之间的数独游戏，并输出到sudoku_game.txt中"<<endl;
-    cout<<"-n num -u ： 生成num个具有唯一解的数独游戏，并输出到sudoku_game.txt中"<<endl;
-    cout<<"-n num -u -m level ： 生成num个具有唯一解的指定难度的数独游戏，并输出到sudoku_game.txt中。level从1到3表示从易到难"<<endl;
-    cout<<"-n num -u -r low~high ： 生成num个具有唯一解的挖空数在low~high之间的数独游戏，并输出到sudoku_game.txt中"<<endl;
-}
+
